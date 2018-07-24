@@ -1,4 +1,7 @@
-// This program drops OpenChirp device transducer values into Redis
+// This program currently just drops OpenChirp device transducer values
+// into Redis.
+// The future goal of this program will be to manage all MQTT bridging and magic
+// for the OpenChirp core.
 // Craig Hesling <craig@hesling.com>
 package main
 
