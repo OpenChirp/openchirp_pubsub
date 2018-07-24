@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	lastValueExpiration = time.Minute //time.Hour * time.Duration(24*32)
+	lastValueExpiration = time.Hour * time.Duration(24*32*4) // roughly 4 months
 	version             = "1.0"
 )
 
