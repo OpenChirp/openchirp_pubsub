@@ -66,6 +66,7 @@ func run(ctx *cli.Context) error {
 	defer mqttClient.Disconnect()
 
 	mqttClient.Subscribe("openchirp/device/+/+", func(topic string, payload []byte) {
+		now := time.Now()
 		log.Debugf("MQTT Message: %s = %s", topic, string(payload))
 
 		// Apply standard OpenChirp topic rules
@@ -74,10 +75,23 @@ func run(ctx *cli.Context) error {
 		key = strings.ToLower(key)
 		value := string(payload)
 
-		res, err := redisClient.Set(key, value, lastValueExpiration).Result()
+		p := redisClient.Pipeline()
+
+		res, err := p.Set(key, value, lastValueExpiration).Result()
 		if err != nil {
 			log.Errorf("Failed to set %s with %s: response=%v | err=%v", key, value, res, err)
 		}
+
+		timestampkey := key + ":time"
+		res, err = p.Set(timestampkey, now.Format(time.RFC3339Nano), lastValueExpiration).Result()
+		if err != nil {
+			log.Errorf("Failed to set %s with %s: response=%v | err=%v", key, value, res, err)
+		}
+
+		if _, err := p.Exec(); err != nil {
+			log.Errorf("Failed to set value/timestamp for %s with %s/%v: response=%v | err=%v", key, value, now, res, err)
+		}
+
 	})
 
 	sig := make(chan os.Signal)
