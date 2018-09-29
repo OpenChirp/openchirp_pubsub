@@ -94,7 +94,7 @@ func run(ctx *cli.Context) error {
 
 	})
 
-	sig := make(chan os.Signal)
+	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 	<-sig
 
