@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coreos/go-systemd/daemon"
 	"github.com/go-redis/redis"
 	"github.com/openchirp/framework/pubsub"
 	"github.com/sirupsen/logrus"
@@ -94,9 +95,17 @@ func run(ctx *cli.Context) error {
 
 	})
 
+	if systemdIntegration {
+		daemon.SdNotify(false, daemon.SdNotifyReady)
+	}
+
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 	<-sig
+
+	if systemdIntegration {
+		daemon.SdNotify(false, daemon.SdNotifyStopping)
+	}
 
 	return nil
 }
